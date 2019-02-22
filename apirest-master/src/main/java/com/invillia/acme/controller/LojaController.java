@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.invillia.acme.classe.Loja;
 import com.invillia.acme.repository.LojaRepository;
+import com.invillia.acme.service.LojaService;
 
 @RestController
 @RequestMapping(value="/loja")
@@ -23,6 +24,8 @@ public class LojaController {
 
 	@Autowired
 	LojaRepository lojaRepository;
+	@Autowired
+	LojaService lojaService;
 
 	/* Pegar todas as lojas*/
 	@GetMapping("/listaLojas")
@@ -39,12 +42,10 @@ public class LojaController {
 	/*pegar loja pelo id*/
 	@GetMapping("/listarLojaPeloId/{id}")
 	public ResponseEntity<Loja> getLojaById(@PathVariable(value="id") Long ljid){
-		Loja lj = lojaRepository.findAllById(ljid);
-		
-		if(lj == null) {
+		if(ljid == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok().body(lj);
+		return ResponseEntity.ok().body(lojaService.pegarLoja(ljid));
 	}
 	
 	
@@ -54,8 +55,7 @@ public class LojaController {
 		if(loja.getId() == null) {
 			return ResponseEntity.notFound().build();
 		}
-		Loja updateLoja =  lojaRepository.save(loja);
-		return ResponseEntity.ok().body(updateLoja);
+		return ResponseEntity.ok().body(lojaService.attLoja(loja));
 		
 	}
 

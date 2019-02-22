@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.invillia.acme.classe.Loja;
 import com.invillia.acme.classe.Pedido;
 import com.invillia.acme.repository.PedidoRepository;
+import com.invillia.acme.service.PedidoService;
 
 @RestController
 @RequestMapping(value="/pedido")
@@ -25,7 +26,8 @@ public class PedidoController {
 
 	@Autowired
 	PedidoRepository pedidoRepository;
-
+	@Autowired
+	PedidoService pedidoService;
 	
 	/* Salvar pedido com Itens */
 	@PostMapping("/criarPedido")
@@ -36,13 +38,12 @@ public class PedidoController {
 	/*pegar pedido pelo id*/
 	@GetMapping("/listarPedido/{id}")
 	public ResponseEntity<Pedido> getPedidoById(@PathVariable(value="id") Long pId){
-		Pedido pe = pedidoRepository.findAllById(pId);
-		
-		if(pe == null) {
+		if(pId == null) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok().body(pe);
+		return ResponseEntity.ok().body(pedidoService.pegarPedido(pId));
 	}
+	
 	
 	/* reembolso de pedido*/
 	@PutMapping("/reembolsoPedido/{id}")
@@ -50,19 +51,7 @@ public class PedidoController {
 		if(pedido.getId() == null) {
 			return ResponseEntity.notFound().build();
 		}
-		
-		if(pedido.getReembolso().equals(false)) {
-			Long diferencaDia = ChronoUnit.DAYS.between(LocalDate.now(), pedido.getDataConfirmacao());
-			if(diferencaDia <= 10 && pedido.getPagamento().getStatus().equals("concluido")) {
-				pedido.setReembolso(true);
-				Pedido p =  pedidoRepository.save(pedido);
-				return ResponseEntity.ok().body(p);
-			}
-			
-		}
-		
-		return ResponseEntity.notFound().build();
-		
+		return ResponseEntity.ok().body(pedidoService.reembolsarPedido(pedido));
 	}
 
 }
